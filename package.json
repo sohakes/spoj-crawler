@@ -1,0 +1,12 @@
+{
+  "name"         : "spoj-scraper",
+  "version"      : "0.0.1",
+  "description"  : "Get submitted spoj problems",
+  "main"         : "crawler.js",
+  "author"       : "Rafael M Tomazela",
+  "dependencies" : {
+    "request"    : "latest",
+    "jsdom"      : "latest",
+    "readline-sync" : "latest"
+  }
+}
