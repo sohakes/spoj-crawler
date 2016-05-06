@@ -1,6 +1,7 @@
 var request = require('request');
 var jsdom = require("jsdom");
 var fs = require('fs');
+var http = require('http');
 var readlineSync = require('readline-sync')
 
 var cookieJar = request.jar();
@@ -8,23 +9,12 @@ request = request.defaults({jar: true})
 
 link = "http://br.spoj.com"
 
-writeToFile = function(link, outResponse) {
-  request({url: link, header: outResponse.headers}, function(error, response, html){
-    if(!error){
-      jsdom.env({html: html, done: function (err, window) {
-        txtarea = window.document.body.querySelector("#file").value
-        name = window.document.body.querySelector("[name=problemcode]").value
-        fs.writeFile("./submissions/"+name, txtarea, function(err) {
-          if(err) {
-            return console.log(err);
-          }
-        });
-        console.log("The file " + name + " was saved.");
-
-        // free memory associated with the window
-        window.close();
-      }});
-    }
+writeToFile = function(link, outResponse, name) {
+  var ext = ''
+  request({url: link, header: outResponse.headers})
+  .on('response', function(response) {
+    ext = /^.+\.(.+)$/.exec(response.headers['content-disposition'])[1]
+    response.pipe(fs.createWriteStream("submissions/" + name + '.' + ext))
   })
 }
 
@@ -37,8 +27,8 @@ getthing = function(outResponse, url){
           if(links[i].textContent.search("accepted") != -1) {
             code = links[i].querySelectorAll(".statustext")[0].textContent.trim()
             problemName = /^.+\/(.+),/.exec(url)[1]
-            realLink = "http://br.spoj.com/submit/" + problemName + "/id=" + code
-            writeToFile(realLink, outResponse)
+            realLink = "http://br.spoj.com/files/src/save/" + code + "/"
+            writeToFile(realLink, outResponse, problemName)
           }
         }
         window.close();
